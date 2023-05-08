@@ -31,18 +31,18 @@ def query_returnOne(query):
 def execute_insert(query):
     cur_obj.execute(query)
     conn.commit()
-    
+
 def name_placeholder_query(self,query,dictionary): # executes a single query given a dictionary of variables
         self.cursor.execute(query,dictionary)
         results = self.cursor.fetchall()
         results = [i[0] for i in results]
         return results
-    
+
 def insert_variables(self,query, variables): # executes a single query only
         cur_obj.execute(query, variables)
         conn.commit()
         print("query executed")
-        
+
 def create_all_tables():
     query = """
     CREATE TABLE IF NOT EXISTS teams (
@@ -73,12 +73,12 @@ def create_all_tables():
         team1_score INT NOT NULL,
         team2_score INT NOT NULL,
         outcome VARCHAR(30) NOT NULL);"""
-    execute_insert(query3)  
+    execute_insert(query3)
     query4 = """
     CREATE TABLE IF NOT EXISTS leagues (
         leagueID INT AUTO_INCREMENT PRIMARY KEY,
         league_name VARCHAR(30) NOT NULL,
-        sport VARCHAR(30) NOT NULL, 
+        sport VARCHAR(30) NOT NULL,
         country VARCHAR(30));"""
     execute_insert(query4)
     query5 = """
@@ -93,10 +93,10 @@ def create_all_tables():
         team_winner_id INT,
         FOREIGN KEY (team_winner_id) REFERENCES teams(teamID));"""
     execute_insert(query5)
-        
+
 def destructor(self): #commit changes and close connection
         self.connection.close()
-        
+
 def options(): # prints options for user to choose from
     print('''
     1. View all records in a table(teams, players, games, leagues, trophies)
@@ -131,8 +131,8 @@ def query_data(): # queries data with parameters/filters
         FROM players
         WHERE playerID = """ + player_id + ";"
         cur_obj.execute(query)
-        return cur_obj.fetchall() 
-    if action == 2: 
+        return cur_obj.fetchall()
+    if action == 2:
         team_name = input("Enter team name: ")
         #subquery to count how many games the team won
         query = """
@@ -142,23 +142,23 @@ def query_data(): # queries data with parameters/filters
         WHERE teams.team_name = %s;
         """
         cur_obj.execute(query, (team_name,))
-        return cur_obj.fetchall() 
-    if action == 3: 
+        return cur_obj.fetchall()
+    if action == 3:
         game = input("Enter gameID: ")
         query = """
         SELECT *
         FROM games
         WHERE gameID = """ + game + " GROUP BY gameID;"
         cur_obj.execute(query)
-        return cur_obj.fetchall() 
-    if action == 4: 
+        return cur_obj.fetchall()
+    if action == 4:
         league_id = input("Enter leagueID: ")
         query = """
         SELECT *
         FROM leagues
         WHERE leagueID = """ + league_id + "GROUP BY league_name;"
         cur_obj.execute(query)
-        return cur_obj.fetchall() 
+        return cur_obj.fetchall()
     if action == 5:
         trophy = input("Enter trophy name: ")
         query = """
@@ -166,10 +166,18 @@ def query_data(): # queries data with parameters/filters
         FROM trophies
         WHERE trophy_name = """ + trophy + "GROUP BY trophy_name;"
         cur_obj.execute(query)
-        return cur_obj.fetchall() 
-        
+        return cur_obj.fetchall()
+
 
 def delete_records(): # deletes record(s)
+    tablename = input("Give me the table name: ")
+    column = input("From what column do u want to remove from: ")
+    data = input("What exacly do u want to delete: ")
+    query = '''
+    DELETE FROM '{tablename}'
+    WHERE '{column}' LIKE '{data}';
+    '''
+    cur_obj.execute(query)
     pass
 
 def update_options():
@@ -207,13 +215,13 @@ def find_table_tuple(num):
         query = '''
         SELECT *
         FROM trophies
-        Where trophyID = ''' + id + ";"           
+        Where trophyID = ''' + id + ";"
     if num == 5:
         id = input("Enter League ID: ")
         query = '''
         SELECT *
         FROM leagues
-        Where leagueID = ''' + id + ";"       
+        Where leagueID = ''' + id + ";"
     cur_obj.execute(query)
     return cur_obj.fetchall()
 
@@ -223,24 +231,24 @@ def findID(a, curr_name):
     if num == 1:
         query = '''
         SELECT playerID
-        FROM players 
+        FROM players
         WHERE player_name = ''' + name + ";"
     if num == 2:
         query = '''
         SELECT teamID
-        FROM teams 
+        FROM teams
         WHERE team_name = ''' + name + ";"
     if num == 3:
         print("DNE")
     if num == 4:
         query = '''
         SELECT trophyID
-        FROM trophies 
+        FROM trophies
         WHERE trophy_name = ''' + name + ";"
     if num == 5:
         query = '''
         SELECT leagueID
-        FROM leagues 
+        FROM leagues
         WHERE league_name = ''' + name + ";"
 #add try catch block??? how to account for input errors
     return query_returnOne(query)
@@ -258,7 +266,7 @@ def update_records(): # updates record(s)
             3. age in years
             4. sport
             5. number of trophies
-            6. Team 
+            6. Team
             ''')
             num = helper.get_choice[(1,2,3,4,5,6)]
             value = input("Enter new value: ")
@@ -276,7 +284,7 @@ def update_records(): # updates record(s)
                 att = "teamID"
                 value = findID(2,value)
             query = '''
-            UPDATE TABLE players 
+            UPDATE TABLE players
             SET ''' + att + " = " + value + '''
             WHERE playerID = ''' + id + ";"
         if opt == 2:
@@ -296,7 +304,7 @@ def update_records(): # updates record(s)
             if num == 3:
                 att = "trophies"
             query = '''
-            UPDATE TABLE teams 
+            UPDATE TABLE teams
             SET ''' + att + " = " + value + '''
             WHERE teamID = ''' + id + ";"
         if opt == 3:
@@ -313,7 +321,7 @@ def update_records(): # updates record(s)
             if num == 3:
                 att = "ourcome"
             query = '''
-            UPDATE TABLE games 
+            UPDATE TABLE games
             SET ''' + att + " = " + value + '''
             WHERE gameID = ''' + id + ";"
         if opt == 4:
@@ -331,16 +339,25 @@ def update_records(): # updates record(s)
                 att = "team_winner_id"
                 value = findID(2,value)
             query = '''
-            UPDATE TABLE trophies 
+            UPDATE TABLE trophies
             SET ''' + att + " = " + value + '''
             WHERE trophyID = ''' + id + ";"
         if opt == 5:
             print("Changes Done")
             break
-    
-    
+
+
 
 def insert_records(): # inserts record(s)
+    #made it single input for testing purpose
+    tablename = input("Give me table name: ")
+    columnname1 = input("Give me the columnname: ")
+    value1 = input("Give me the values you want to input: ")
+    query = '''
+    INSERT INTO '{tablename}'('{columnname1}')
+    VALUES (%s, %s, %s), ('{value1}')
+    '''
+    cur_obj.execute(query)
     pass
 
 def insert_sample_data(): # inserts sample data
